@@ -2,7 +2,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { PDFContent, Chapter } from '../types/pdf';
 
 // Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.js`;
 
 interface ParsedPage {
   pageNumber: number;
