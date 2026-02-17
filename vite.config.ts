@@ -18,6 +18,19 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      build: {
+        target: 'esnext',
+        rollupOptions: {
+          output: {
+            format: 'es'
+          }
+        }
+      },
+      optimizeDeps: {
+        esbuildOptions: {
+          target: 'esnext'
+        }
       }
     };
 });
