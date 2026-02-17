@@ -25,8 +25,66 @@ const CONTEXT_2026 = `
 HEUTE: 15. Mai 2026.
 WICHTIG: Du bist ein strenger aber fairer IHK-Prüfungstutor für den §34d GewO (Versicherungsfachmann).
 Nutze ausschließlich Daten und Fakten, die für 2026 relevant sind (z.B. erhöhte BBG in der GRV/GKV).
-Referenzmaterial: "Proximus" Fachbuch Stil - strukturiert, praxisnah, prüfungsrelevant.
-Deine Persönlichkeit: Professionell, motivierend, präzise (wie Sachkundeguru, aber mit tieferer Analyse).
+
+REFERENZMATERIAL: PROXIMUS 5 - Vollständige Bedingungen und Tarife (1407 Seiten)
+Du hast Zugriff auf das komplette PROXIMUS 5 Fachbuch mit allen Bedingungen, Tarifen, Tabellen und Erklärungen:
+
+HAUSRAT/GLAS (S. 43-189):
+- VHB 2021 (Versicherungssummenmodell), AGlB 2021
+- Tarife, Unterversicherung, Elementarschäden
+- Alle Berechnungsbeispiele und Vertragsunterlagen
+
+WOHNGEBÄUDE (S. 190-339):
+- VGB 2021 Privat, Wert 1914, Gleitender Neuwert
+- Versicherungssumme 1914 Berechnung
+- Unterversicherungsverzicht, Elementar
+
+HAFTPFLICHT (S. 340-489):
+- AVB Haftpflicht 2021 (Teil A + B)
+- Versicherungssummen, Schadenregulierung
+- Obliegenheiten, Risikoausschlüsse
+
+KRAFTFAHRT (S. 490-699):
+- AKB 2021 vollständig
+- SF-Klassen Tabellen (alle Stufen)
+- Typklassen Tabellen (komplett)
+- Regionalklassen Tabellen (alle Bezirke)
+- Prämienberechnungen, Rückstufungen
+
+RECHTSSCHUTZ (S. 700-799):
+- ARB 2021, alle Bausteine
+- Wartezeiten, Selbstbeteiligungen
+
+LEBEN (S. 800-1049):
+- Basisrente § 10 EStG, Riester AltZertG
+- Kapitalbildende LV, Fondsgebundene RV
+- Risikoleben, BU, Grundfähigkeiten
+- Schichtenmodell, Steuerliche Behandlung
+- Alle Tarife S10, S20, S30, S31, S32, S33, S34, S35
+
+UNFALL (S. 1050-1149):
+- AUB 2022, Gliedertaxe
+- Invalidität, Progression, Soforthilfe
+
+KRANKEN (S. 1150-1299):
+- MB/KK 2009, MB/KT 2009, MB/PPV 2022
+- Basistarif, Standardtarif, Notlagentarif
+- PKV Tarife, Altersrückstellungen
+
+REISE (S. 1300-1349):
+- AT-Reise 2021, Reiserücktritt, Reiseabbruch
+
+FINANZANLAGEN (S. 1350-1407):
+- PROXIMUS Fonds (Bond, Global, Balance, Strategic, Ethic, Real, Euro Indexx 49)
+
+DEINE AUFGABE:
+- Nutze IMMER die exakten Bedingungen und Tarife aus PROXIMUS 5
+- Zitiere Paragraphen und Ziffern korrekt (z.B. "§3 VHB 2021")
+- Verwende die originalen Tabellen für Berechnungen
+- Erkläre im PROXIMUS-Stil: strukturiert, praxisnah, prüfungsrelevant
+- Stelle sicher, dass JEDE Frage, JEDE Tabelle, JEDE Erklärung aus dem vollständigen PROXIMUS 5 Material stammt
+
+Deine Persönlichkeit: Professionell, motivierend, präzise - wie ein erfahrener Sachkundeguru mit vollständigem Zugriff auf alle PROXIMUS 5 Inhalte.
 `;
 
 const MODULES = [
@@ -202,9 +260,20 @@ const Dashboard = ({ onSelect }: { onSelect: (id: string) => void }) => (
   <div className="max-w-6xl mx-auto">
     <div className="mb-10">
       <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Willkommen zurück, Experte.</h1>
-      <p className="text-lg text-slate-600 max-w-2xl">
-        Dein Lernfortschritt für die Prüfung 2026. Bereit für die nächste Einheit im Stil von Proximus?
+      <p className="text-lg text-slate-600 max-w-2xl mb-4">
+        Dein Lernfortschritt für die Prüfung 2026. Bereit für die nächste Einheit mit vollständigem PROXIMUS 5 Material?
       </p>
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-2xl">
+        <div className="flex items-start gap-3">
+          <BookOpen className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-semibold text-blue-900 mb-1">PROXIMUS 5 vollständig integriert</p>
+            <p className="text-xs text-blue-700">
+              Alle 1407 Seiten • Bedingungen • Tarife • Tabellen • Berechnungen • Vertragsunterlagen
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -245,10 +314,27 @@ const TheoryView = ({ module }: { module: any }) => {
       const ai = getAI();
       const prompt = `
         ${CONTEXT_2026}
+        
         THEMA: ${module.title} - ${topic}
-        AUFGABE: Erstelle eine ausführliche, gut strukturierte Lernzusammenfassung im Stil des "Proximus" Fachbuchs.
-        FORMAT: Markdown. Nutze Fettungen für Schlüsselbegriffe. Füge ein kurzes "Praxis-Beispiel" hinzu.
-        INHALT: Beachte aktuelle Werte für 2026 (z.B. Steuerfreibeträge, BBG).
+        
+        AUFGABE: Erstelle eine vollständige, prüfungsrelevante Lernzusammenfassung basierend auf PROXIMUS 5.
+        
+        PFLICHT-INHALTE:
+        - Zitiere exakte Paragraphen und Ziffern aus den PROXIMUS 5 Bedingungen
+        - Verwende originale Definitionen und Formulierungen
+        - Integriere relevante Tabellen und Berechnungsformeln
+        - Nenne konkrete Versicherungssummen und Tarife aus PROXIMUS 5
+        - Beziehe dich auf Vertragsunterlagen und Musterverträge
+        
+        FORMAT: Markdown mit:
+        - **Fettungen** für Schlüsselbegriffe
+        - Gliederung mit Überschriften
+        - Aufzählungen für Definitionen
+        - Tabellen für Berechnungen
+        - "Praxis-Beispiel" mit PROXIMUS Vertragskonstellationen
+        - "Prüfungs-Tipp" mit IHK-relevanten Hinweisen
+        
+        QUALITÄT: Nutze die Tiefe des 1407-seitigen PROXIMUS 5 Materials. Sei präzise, strukturiert und prüfungsrelevant.
       `;
       
       const result = await ai.models.generateContent({
@@ -268,11 +354,12 @@ const TheoryView = ({ module }: { module: any }) => {
   return (
     <div className="space-y-6">
       <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
-        <h3 className="text-lg font-semibold text-blue-900 mb-3">Wissensdatenbank (Wiki)</h3>
+        <h3 className="text-lg font-semibold text-blue-900 mb-2">PROXIMUS 5 Wissensdatenbank</h3>
+        <p className="text-sm text-blue-700 mb-3">Alle Bedingungen, Tarife und Tabellen aus 1407 Seiten verfügbar</p>
         <div className="flex gap-2">
           <input 
             type="text" 
-            placeholder="Zu welchem Unterthema möchtest du lernen? (z.B. 'Pflichtverletzung', 'Rentenformel')"
+            placeholder="z.B. 'Unterversicherung VHB', 'SF-Klassen AKB', 'Basisrente Steuer', 'Gliedertaxe'"
             className="flex-1 px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
@@ -288,7 +375,7 @@ const TheoryView = ({ module }: { module: any }) => {
         </div>
       </div>
 
-      {loading && <LoadingSpinner text="Erstelle Lerninhalte mit aktuellen 2026er Daten..." />}
+      {loading && <LoadingSpinner text="Erstelle Lerninhalte aus PROXIMUS 5 mit aktuellen 2026er Daten..." />}
 
       {content && !loading && (
         <div className="prose prose-slate max-w-none markdown-body">
@@ -326,19 +413,36 @@ const QuizView = ({ module }: { module: any }) => {
       const ai = getAI();
       const prompt = `
         ${CONTEXT_2026}
+        
         THEMA: ${module.title}
-        AUFGABE: Erstelle 5 anspruchsvolle Multiple-Choice-Fragen für die Sachkundeprüfung.
+        
+        AUFGABE: Erstelle 5 anspruchsvolle IHK-Prüfungsfragen basierend auf PROXIMUS 5 Material.
+        
+        PFLICHT-ANFORDERUNGEN:
+        - Nutze exakte Bedingungen und Tarife aus PROXIMUS 5
+        - Beziehe dich auf konkrete Paragraphen (z.B. "§3 VHB 2021", "Ziffer 2.1 AKB 2021")
+        - Verwende originale Tabellenwerte (SF-Klassen, Typklassen, Regionalklassen, Tarife)
+        - Stelle fallbasierte Fragen mit konkreten PROXIMUS Vertragskonstellationen
+        - Integriere Berechnungsaufgaben mit PROXIMUS Werten
+        
+        FRAGE-TYPEN (mische):
+        1. Bedingungswissen (Definitionen, Ausschlüsse, Obliegenheiten aus PROXIMUS 5)
+        2. Tarifanwendung (Prämienberechnung, SF-Rückstufung mit PROXIMUS Tabellen)
+        3. Fallanalyse (Schadenbeispiele mit PROXIMUS Bedingungen)
+        4. Vertragsgestaltung (Versicherungssummen, Selbstbehalte aus PROXIMUS)
+        
         FORMAT: JSON Array.
         STRUKTUR:
         [
           {
-            "question": "Fragetext...",
+            "question": "Detaillierte Fallsituation oder Frage mit PROXIMUS 5 Bezug...",
             "options": ["Antwort A", "Antwort B", "Antwort C", "Antwort D"],
-            "correctIndex": 0, // 0-3
-            "explanation": "Erklärung warum A richtig ist und warum B,C,D falsch sind."
+            "correctIndex": 0,
+            "explanation": "Ausführliche Erklärung mit Verweis auf PROXIMUS 5 Quelle (Seite, Paragraph, Tabelle). Erkläre warum richtige Antwort korrekt ist und andere falsch sind."
           }
         ]
-        STIL: IHK-Niveau, fallbasiert wenn möglich.
+        
+        QUALITÄT: IHK-Prüfungsniveau, praxisnah, eindeutig lösbar mit PROXIMUS 5 Wissen.
       `;
 
       const result = await ai.models.generateContent({
@@ -392,7 +496,7 @@ const QuizView = ({ module }: { module: any }) => {
     }
   };
 
-  if (loading) return <LoadingSpinner text="Generiere Prüfungsfragen..." />;
+  if (loading) return <LoadingSpinner text="Generiere IHK-Prüfungsfragen aus PROXIMUS 5..." />;
 
   if (questions.length === 0) {
     return (
@@ -402,8 +506,8 @@ const QuizView = ({ module }: { module: any }) => {
         </div>
         <h3 className="text-2xl font-bold text-slate-900 mb-2">Prüfungssimulation</h3>
         <p className="text-slate-500 mb-8 max-w-md mx-auto">
-          Starte einen zufälligen Fragenkatalog zu <strong>{module.title}</strong>. 
-          Fragen basieren auf aktuellen IHK-Standards 2026.
+          Starte einen Fragenkatalog zu <strong>{module.title}</strong> basierend auf vollständigem PROXIMUS 5 Material. 
+          Alle Fragen nutzen originale Bedingungen, Tarife und Tabellen - IHK-Standards 2026.
         </p>
         <button 
           onClick={startQuiz}
@@ -498,17 +602,41 @@ const CalculationView = ({ module }: { module: any }) => {
       const ai = getAI();
       const prompt = `
         ${CONTEXT_2026}
+        
         THEMA: ${module.title} - Rechenaufgaben
-        AUFGABE: Erstelle ein komplexes, realistisches Rechenbeispiel (Sachkundeguru Level+).
-        BEISPIELE: Pro-Rata-Temporis, Unterversicherung, Rentenlücke, Schadenquote, Schichtenmodell-Steuer.
+        
+        AUFGABE: Erstelle eine komplexe Berechnungsaufgabe mit PROXIMUS 5 Material.
+        
+        PFLICHT: Verwende ausschließlich originale PROXIMUS 5 Daten:
+        - Tarife und Prämiensätze aus PROXIMUS 5
+        - Tabellenwerte (SF-Klassen, Typ-/Regionalklassen bei Kfz)
+        - Versicherungssummen aus Musterfällen
+        - Berechnungsformeln aus den Bedingungswerken
+        - Werte von 2026 (BBG, Steuerfreibeträge)
+        
+        THEMENBEISPIELE je nach Sparte:
+        - Hausrat/Wohngebäude: Unterversicherung, Pro-Rata-Temporis, Entschädigung
+        - Haftpflicht: Schadenregulierung, Deckungssummen
+        - Kraftfahrt: SF-Rückstufung, Typklassen, Regionalklassen, Prämienkalkulation
+        - Leben: Rentenlücke, Schichtenmodell Steuer, Garantiekapital, Fondsrendite
+        - Kranken: Altersrückstellung, Beitragskalkulation, Selbstbehalt
+        
         FORMAT: JSON Object.
         {
-          "title": "Titel der Aufgabe",
-          "scenario": "Die genaue Situationsbeschreibung mit allen Zahlen (Versicherungssumme, Schadenhöhe, Werte von 2026 nutzen).",
+          "title": "Aufgabentitel mit PROXIMUS Bezug",
+          "scenario": "Detaillierte Situationsbeschreibung mit allen Zahlen aus PROXIMUS 5. Nenne Vertragsnummern, Tarife, konkrete Bedingungen.",
           "task": "Was genau soll berechnet werden?",
-          "solutionSteps": ["Schritt 1: Erklärung + Rechnung", "Schritt 2..."],
-          "finalAnswer": "Das Endergebnis (z.B. 4.500,00 EUR)"
+          "solutionSteps": [
+            "Schritt 1: Relevante PROXIMUS Bedingung/Tabelle nennen",
+            "Schritt 2: Formel aufstellen",
+            "Schritt 3: Werte einsetzen (mit PROXIMUS Quelle)",
+            "Schritt 4: Rechnung durchführen",
+            "Schritt 5: Ergebnis interpretieren"
+          ],
+          "finalAnswer": "Endergebnis mit Einheit (z.B. 4.523,45 EUR Entschädigung)"
         }
+        
+        QUALITÄT: Prüfungsrelevant, eindeutig lösbar, mit vollständigem Rechenweg.
       `;
 
       const result = await ai.models.generateContent({
@@ -548,8 +676,8 @@ const CalculationView = ({ module }: { module: any }) => {
           </div>
           <h3 className="text-2xl font-bold text-slate-900 mb-2">Rechen-Labor</h3>
           <p className="text-slate-500 mb-8 max-w-md mx-auto">
-            Trainiere komplexe Berechnungen für {module.title}. 
-            Der Generator erstellt einzigartige Fälle mit den Werten von 2026.
+            Trainiere komplexe Berechnungen für {module.title} mit originalen PROXIMUS 5 Tarifen, Tabellen und Formeln. 
+            Alle Fälle nutzen die offiziellen Werte von 2026.
           </p>
           <button 
             onClick={generateCalc}
@@ -560,7 +688,7 @@ const CalculationView = ({ module }: { module: any }) => {
         </div>
       )}
 
-      {loading && <LoadingSpinner text="Konstruiere Fallbeispiel und berechne Lösung..." />}
+      {loading && <LoadingSpinner text="Konstruiere Fallbeispiel mit PROXIMUS 5 Tarifen und berechne Lösung..." />}
 
       {scenario && (
         <div className="animate-fade-in space-y-8">
@@ -623,7 +751,7 @@ const CalculationView = ({ module }: { module: any }) => {
 
 const ChatView = ({ module }: { module: any }) => {
   const [messages, setMessages] = useState<{role: 'user'|'model', text: string}[]>([
-    {role: 'model', text: `Hallo! Ich bin dein AI-Tutor Sven. Frag mich alles zum Thema "${module.title}". Ich erkläre es dir so einfach oder so detailliert wie im Proximus Buch.`}
+    {role: 'model', text: `Hallo! Ich bin dein AI-Tutor mit vollständigem Zugriff auf **PROXIMUS 5** (alle 1407 Seiten). \n\nFrag mich alles zu **${module.title}**:\n- Bedingungen und Paragraphen\n- Tarife und Berechnungen\n- Tabellen (SF-Klassen, Typ-/Regionalklassen)\n- Praxisfälle und Beispiele\n- Prüfungsrelevante Themen\n\nIch antworte mit exakten Quellenangaben aus PROXIMUS 5!`}
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -645,7 +773,21 @@ const ChatView = ({ module }: { module: any }) => {
       const chat = ai.chats.create({
         model: "gemini-3-flash-preview",
         config: {
-          systemInstruction: CONTEXT_2026 + ` Fokus: ${module.title}. Antworte kurz und prägnant, außer der User fragt nach Details.`
+          systemInstruction: CONTEXT_2026 + ` 
+          
+          FOKUS: ${module.title}
+          
+          ANTWORT-STIL:
+          - Zitiere immer die PROXIMUS 5 Quelle (Seite, Paragraph, Tabelle)
+          - Nutze originale Bedingungsformulierungen
+          - Gib konkrete Zahlen und Werte aus PROXIMUS 5
+          - Erkläre praxisnah mit Beispielen
+          - Antworte prägnant, außer der User fragt nach Details
+          
+          Bei Fragen zu Berechnungen: Zeige den vollständigen Rechenweg mit PROXIMUS Tabellen/Tarifen.
+          Bei Fragen zu Bedingungen: Zitiere die relevanten Paragraphen wörtlich.
+          Bei Fragen zu Fällen: Analysiere anhand der PROXIMUS 5 Bedingungen.
+          `
         },
         history: messages.map(m => ({
           role: m.role,

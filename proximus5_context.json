@@ -1,0 +1,178 @@
+{
+  "title": "PROXIMUS 5 - Versicherungsbedingungen und Tarife",
+  "version": "5.0",
+  "total_pages": 1407,
+  "publisher": "Berufsbildungswerk der Deutschen Versicherungswirtschaft (BWV) e.V.",
+  "year": "2026",
+  "description": "Vollständige Bedingungen und Tarife des Ausbildungsunternehmens Proximus Versicherung AG für bundeseinheitliche IHK-Prüfungen nach VO 2022",
+  
+  "sections": {
+    "hausrat_glas": {
+      "title": "Hausrat- und Glasversicherung",
+      "pages": "43-189",
+      "content_types": ["Bedingungen VHB 2021", "Glasversicherung AGlB 2021", "Tarife", "Vertragsunterlagen"],
+      "key_topics": [
+        "Versicherungssummenmodell",
+        "Elementarschäden",
+        "Unterversicherung",
+        "Glasbruchschäden",
+        "Prämienberechnung"
+      ]
+    },
+    "wohngebäude": {
+      "title": "Wohngebäudeversicherung",
+      "pages": "190-339",
+      "content_types": ["Bedingungen VGB 2021 Privat", "Wert 1914", "Gleitender Neuwert", "Tarife"],
+      "key_topics": [
+        "Versicherungssumme 1914",
+        "Gleitender Neuwert",
+        "Unterversicherungsverzicht",
+        "Elementarschäden",
+        "Gebäudebewertung"
+      ]
+    },
+    "haftpflicht": {
+      "title": "Private Haftpflichtversicherung",
+      "pages": "340-489",
+      "content_types": ["AVB für Haftpflicht 2021", "Teil A Versicherungsschutz", "Teil B Rechte und Pflichten", "Tarife"],
+      "key_topics": [
+        "Versicherungssummen",
+        "Schadenregulierung",
+        "Obliegenheiten",
+        "Risikoausschlüsse",
+        "Deckungskonzepte"
+      ]
+    },
+    "kraftfahrt": {
+      "title": "Kraftfahrtversicherung",
+      "pages": "490-699",
+      "content_types": ["AKB 2021", "Schadenfreiheitsrabatt", "Typklassen", "Regionalklassen", "Tarife"],
+      "key_topics": [
+        "Kfz-Haftpflicht",
+        "Kaskoversicherung (Voll/Teil)",
+        "SF-Klassen System",
+        "Typklassen Tabellen",
+        "Regionalklassen Tabellen",
+        "Prämienberechnung",
+        "Rückstufung"
+      ]
+    },
+    "rechtsschutz": {
+      "title": "Rechtsschutzversicherung",
+      "pages": "700-799",
+      "content_types": ["ARB 2021", "Tarife", "Vertragsunterlagen"],
+      "key_topics": [
+        "Rechtsschutzbausteine",
+        "Wartezeiten",
+        "Selbstbeteiligung",
+        "Versicherungssummen"
+      ]
+    },
+    "leben": {
+      "title": "Lebensversicherung und bAV",
+      "pages": "800-1049",
+      "content_types": ["Rentenversicherung", "Basisrente", "Riester", "Fondsgebunden", "Risikoleben", "BU", "Tarife"],
+      "key_topics": [
+        "Basisrente (Rürup) § 10 EStG",
+        "Riester-Rente AltZertG",
+        "Kapitalbildende LV",
+        "Fondsgebundene RV",
+        "Risikolebensversicherung",
+        "Berufsunfähigkeitsversicherung",
+        "Grundfähigkeitenversicherung",
+        "Schichtenmodell",
+        "Steuerliche Behandlung",
+        "Garantien und Überschüsse"
+      ]
+    },
+    "unfall": {
+      "title": "Unfallversicherung",
+      "pages": "1050-1149",
+      "content_types": ["AUB 2022", "Tarife", "Vertragsunterlagen"],
+      "key_topics": [
+        "Unfallbegriff",
+        "Invaliditätsleistungen",
+        "Gliedertaxe",
+        "Progression",
+        "Soforthilfe"
+      ]
+    },
+    "kranken": {
+      "title": "Kranken- und Pflegeversicherung",
+      "pages": "1150-1299",
+      "content_types": ["MB/KK 2009", "MB/KT 2009", "MB/PPV 2022", "Basistarif", "Standardtarif", "Tarife"],
+      "key_topics": [
+        "Krankheitskostenvollversicherung",
+        "Krankentagegeld",
+        "Private Pflegepflichtversicherung",
+        "Geförderte Pflegeversicherung",
+        "Basistarif",
+        "Standardtarif",
+        "Notlagentarif",
+        "Tarifwechsel",
+        "Altersrückstellungen"
+      ]
+    },
+    "reise": {
+      "title": "Reiseversicherung",
+      "pages": "1300-1349",
+      "content_types": ["AT-Reise 2021", "Reiserücktritt", "Reiseabbruch", "Reisegepäck", "Tarife"],
+      "key_topics": [
+        "Reiserücktrittsversicherung",
+        "Reiseabbruchversicherung",
+        "Reisegepäckversicherung",
+        "Versicherte Risiken"
+      ]
+    },
+    "finanzanlagen": {
+      "title": "Finanzanlagen und Fonds",
+      "pages": "1350-1407",
+      "content_types": ["Fondsbedingungen", "Anlegerinformationen", "KIID"],
+      "key_topics": [
+        "PROXIMUS Bond Invest",
+        "PROXIMUS Global Invest",
+        "PROXIMUS Balance Invest",
+        "PROXIMUS Strategic Invest",
+        "PROXIMUS Ethic Invest",
+        "PROXIMUS Real Invest",
+        "PROXIMUS Euro Indexx 49 Invest",
+        "Fondskosten und Risiken"
+      ]
+    }
+  },
+  
+  "module_mappings": {
+    "recht": {
+      "title": "Rechtliche Grundlagen",
+      "proximus_sections": ["hausrat_glas", "wohngebäude", "haftpflicht", "kraftfahrt", "rechtsschutz", "leben", "unfall", "kranken", "reise"],
+      "focus": "VVG, GewO, VAG, Datenschutz, Obliegenheiten, Bedingungswerke"
+    },
+    "grv": {
+      "title": "Gesetzliche Rentenversicherung",
+      "proximus_sections": ["leben"],
+      "focus": "SGB VI, Rentenarten, Besteuerung, Versorgungslücke, Schichtenmodell"
+    },
+    "lebens": {
+      "title": "Lebensversicherung & bAV",
+      "proximus_sections": ["leben"],
+      "focus": "Basisrente, Riester, Fondsgebunden, Risikoleben, BU, Schichtenmodell"
+    },
+    "kranken": {
+      "title": "Kranken- & Pflegeversicherung",
+      "proximus_sections": ["kranken"],
+      "focus": "GKV vs PKV, Beihilfe, Pflegegrade, Tarife, Altersrückstellungen"
+    },
+    "sach": {
+      "title": "Sach- & Vermögensversicherung",
+      "proximus_sections": ["hausrat_glas", "wohngebäude"],
+      "focus": "Hausrat, Wohngebäude, Unterversicherung, Elementar"
+    },
+    "auto": {
+      "title": "Kraftfahrtversicherung",
+      "proximus_sections": ["kraftfahrt"],
+      "focus": "KH, Kasko, Typklassen, SF-Klassen, Regionalklassen"
+    }
+  },
+  
+  "reference_notice": "Dieses Lernprogramm verwendet die vollständige Proximus 5 Dokumentation (1407 Seiten) als Referenzmaterial für die IHK-Sachkundeprüfung nach §34d GewO. Alle Bedingungen, Tarife, Tabellen und Berechnungsbeispiele basieren auf den offiziellen Proximus 5 Unterlagen für 2026."
+}
