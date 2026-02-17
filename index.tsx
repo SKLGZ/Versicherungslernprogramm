@@ -15,7 +15,12 @@ import {
   Target, 
   XCircle,
   Menu,
-  X
+  X,
+  TrendingUp,
+  Award,
+  Clock,
+  BarChart3,
+  Trash2
 } from "lucide-react";
 
 // --- Types & Constants ---
@@ -46,6 +51,25 @@ interface Question {
   options: string[];
   correctIndex: number;
   explanation: string;
+  id?: string;
+}
+
+interface QuestionResult {
+  questionId: string;
+  question: string;
+  moduleId: string;
+  correct: boolean;
+  timestamp: number;
+  selectedIndex: number;
+  correctIndex: number;
+}
+
+interface ModuleProgress {
+  moduleId: string;
+  questionsAttempted: number;
+  correctAnswers: number;
+  incorrectAnswers: number;
+  lastAccessed: number;
 }
 
 interface CalcScenario {
@@ -55,6 +79,84 @@ interface CalcScenario {
   solutionSteps: string[];
   finalAnswer: string;
 }
+
+// --- LocalStorage Helper Functions ---
+
+const STORAGE_KEYS = {
+  RESULTS: 'versicherung_quiz_results',
+  PROGRESS: 'versicherung_module_progress'
+};
+
+const saveQuestionResult = (result: QuestionResult) => {
+  try {
+    const results = JSON.parse(localStorage.getItem(STORAGE_KEYS.RESULTS) || '[]');
+    results.push(result);
+    localStorage.setItem(STORAGE_KEYS.RESULTS, JSON.stringify(results));
+    
+    // Update module progress
+    updateModuleProgress(result.moduleId, result.correct);
+  } catch (e) {
+    console.error('Failed to save result:', e);
+  }
+};
+
+const getQuestionResults = (): QuestionResult[] => {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.RESULTS) || '[]');
+  } catch {
+    return [];
+  }
+};
+
+const updateModuleProgress = (moduleId: string, correct: boolean) => {
+  try {
+    const progress = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROGRESS) || '{}');
+    
+    if (!progress[moduleId]) {
+      progress[moduleId] = {
+        moduleId,
+        questionsAttempted: 0,
+        correctAnswers: 0,
+        incorrectAnswers: 0,
+        lastAccessed: Date.now()
+      };
+    }
+    
+    progress[moduleId].questionsAttempted++;
+    if (correct) {
+      progress[moduleId].correctAnswers++;
+    } else {
+      progress[moduleId].incorrectAnswers++;
+    }
+    progress[moduleId].lastAccessed = Date.now();
+    
+    localStorage.setItem(STORAGE_KEYS.PROGRESS, JSON.stringify(progress));
+  } catch (e) {
+    console.error('Failed to update progress:', e);
+  }
+};
+
+const getModuleProgress = (moduleId: string): ModuleProgress | null => {
+  try {
+    const progress = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROGRESS) || '{}');
+    return progress[moduleId] || null;
+  } catch {
+    return null;
+  }
+};
+
+const getAllProgress = (): { [key: string]: ModuleProgress } => {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.PROGRESS) || '{}');
+  } catch {
+    return {};
+  }
+};
+
+const clearAllProgress = () => {
+  localStorage.removeItem(STORAGE_KEYS.RESULTS);
+  localStorage.removeItem(STORAGE_KEYS.PROGRESS);
+};
 
 // --- API Helper ---
 
@@ -198,38 +300,129 @@ const ModeButton = ({ active, onClick, icon: Icon, label }: any) => (
   </button>
 );
 
-const Dashboard = ({ onSelect }: { onSelect: (id: string) => void }) => (
-  <div className="max-w-6xl mx-auto">
-    <div className="mb-10">
-      <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Willkommen zurück, Experte.</h1>
-      <p className="text-lg text-slate-600 max-w-2xl">
-        Dein Lernfortschritt für die Prüfung 2026. Bereit für die nächste Einheit im Stil von Proximus?
-      </p>
-    </div>
+const Dashboard = ({ onSelect }: { onSelect: (id: string) => void }) => {
+  const allProgress = getAllProgress();
+  const allResults = getQuestionResults();
+  
+  const totalQuestions = allResults.length;
+  const correctAnswers = allResults.filter(r => r.correct).length;
+  const successRate = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+  
+  const handleClearProgress = () => {
+    if (confirm('Möchten Sie wirklich alle Fortschritte löschen? Diese Aktion kann nicht rückgängig gemacht werden.')) {
+      clearAllProgress();
+      window.location.reload();
+    }
+  };
+  
+  return (
+    <div className="max-w-6xl mx-auto">
+      <div className="mb-10">
+        <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Willkommen zurück, Experte.</h1>
+        <p className="text-lg text-slate-600 max-w-2xl">
+          Dein Lernfortschritt für die Prüfung 2026. Bereit für die nächste Einheit im Stil von Proximus?
+        </p>
+      </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {MODULES.map((m) => (
-        <div 
-          key={m.id}
-          onClick={() => onSelect(m.id)}
-          className="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg hover:border-blue-400 transition-all cursor-pointer relative overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-          <div className="relative z-10">
-            <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-              <m.icon size={24} />
+      {/* Progress Statistics */}
+      {totalQuestions > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-2xl shadow-md">
+            <div className="flex items-center justify-between mb-2">
+              <Target className="w-8 h-8 opacity-80" />
+              <span className="text-3xl font-bold">{totalQuestions}</span>
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">{m.title}</h3>
-            <p className="text-slate-500 text-sm">{m.desc}</p>
-            <div className="mt-6 flex items-center text-blue-600 font-semibold text-sm group-hover:underline">
-              Starten <ChevronRight size={16} />
+            <p className="text-blue-100 text-sm font-medium">Fragen beantwortet</p>
+          </div>
+          
+          <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-2xl shadow-md">
+            <div className="flex items-center justify-between mb-2">
+              <CheckCircle className="w-8 h-8 opacity-80" />
+              <span className="text-3xl font-bold">{correctAnswers}</span>
             </div>
+            <p className="text-green-100 text-sm font-medium">Richtige Antworten</p>
+          </div>
+          
+          <div className="bg-gradient-to-br from-red-500 to-red-600 text-white p-6 rounded-2xl shadow-md">
+            <div className="flex items-center justify-between mb-2">
+              <XCircle className="w-8 h-8 opacity-80" />
+              <span className="text-3xl font-bold">{totalQuestions - correctAnswers}</span>
+            </div>
+            <p className="text-red-100 text-sm font-medium">Falsche Antworten</p>
+          </div>
+          
+          <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-2xl shadow-md">
+            <div className="flex items-center justify-between mb-2">
+              <TrendingUp className="w-8 h-8 opacity-80" />
+              <span className="text-3xl font-bold">{successRate}%</span>
+            </div>
+            <p className="text-purple-100 text-sm font-medium">Erfolgsquote</p>
           </div>
         </div>
-      ))}
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {MODULES.map((m) => {
+          const progress = allProgress[m.id];
+          const moduleResults = allResults.filter(r => r.moduleId === m.id);
+          const moduleCorrect = moduleResults.filter(r => r.correct).length;
+          const moduleTotal = moduleResults.length;
+          const moduleRate = moduleTotal > 0 ? Math.round((moduleCorrect / moduleTotal) * 100) : 0;
+          
+          return (
+            <div 
+              key={m.id}
+              onClick={() => onSelect(m.id)}
+              className="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg hover:border-blue-400 transition-all cursor-pointer relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+              <div className="relative z-10">
+                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <m.icon size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">{m.title}</h3>
+                <p className="text-slate-500 text-sm mb-4">{m.desc}</p>
+                
+                {/* Module Progress */}
+                {progress && (
+                  <div className="mb-3 space-y-2">
+                    <div className="flex justify-between text-xs text-slate-600">
+                      <span>{moduleTotal} Fragen</span>
+                      <span className={moduleRate >= 70 ? 'text-green-600 font-semibold' : 'text-slate-600'}>{moduleRate}%</span>
+                    </div>
+                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full transition-all ${moduleRate >= 70 ? 'bg-green-500' : 'bg-blue-500'}`}
+                        style={{ width: `${moduleRate}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="mt-6 flex items-center text-blue-600 font-semibold text-sm group-hover:underline">
+                  Starten <ChevronRight size={16} />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      
+      {/* Clear Progress Button */}
+      {totalQuestions > 0 && (
+        <div className="mt-8 flex justify-center">
+          <button 
+            onClick={handleClearProgress}
+            className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+          >
+            <Trash2 size={16} />
+            Fortschritt zurücksetzen
+          </button>
+        </div>
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 // --- Content Views ---
 
@@ -313,21 +506,35 @@ const QuizView = ({ module }: { module: any }) => {
   const [showResult, setShowResult] = useState(false);
   const [loading, setLoading] = useState(false);
   const [score, setScore] = useState(0);
+  const [examMode, setExamMode] = useState(false);
+  const [examStartTime, setExamStartTime] = useState<number | null>(null);
+  const [showExamResults, setShowExamResults] = useState(false);
+  const [answerHistory, setAnswerHistory] = useState<{questionIndex: number, selectedIndex: number, correct: boolean}[]>([]);
+  const [questionOrder, setQuestionOrder] = useState<'sequential' | 'random'>('random');
 
-  const startQuiz = async () => {
+  const startQuiz = async (isExamMode: boolean = false) => {
     setLoading(true);
     setQuestions([]);
     setCurrentIndex(0);
     setScore(0);
     setShowResult(false);
     setSelectedOption(null);
+    setExamMode(isExamMode);
+    setShowExamResults(false);
+    setAnswerHistory([]);
+    
+    if (isExamMode) {
+      setExamStartTime(Date.now());
+    }
 
     try {
       const ai = getAI();
+      const questionCount = isExamMode ? 10 : 5;
       const prompt = `
         ${CONTEXT_2026}
         THEMA: ${module.title}
-        AUFGABE: Erstelle 5 anspruchsvolle Multiple-Choice-Fragen für die Sachkundeprüfung.
+        AUFGABE: Erstelle ${questionCount} anspruchsvolle Multiple-Choice-Fragen für die Sachkundeprüfung.
+        ${isExamMode ? 'PRÜFUNGSMODUS: Fragen sollten realistische Prüfungssituationen widerspiegeln.' : ''}
         FORMAT: JSON Array.
         STRUKTUR:
         [
@@ -361,7 +568,19 @@ const QuizView = ({ module }: { module: any }) => {
         }
       });
       
-      const data = JSON.parse(result.text || "[]");
+      let data = JSON.parse(result.text || "[]");
+      
+      // Add IDs to questions
+      data = data.map((q: Question, idx: number) => ({
+        ...q,
+        id: `${module.id}_${Date.now()}_${idx}`
+      }));
+      
+      // Shuffle questions if random order
+      if (questionOrder === 'random' && !isExamMode) {
+        data = data.sort(() => Math.random() - 0.5);
+      }
+      
       setQuestions(data);
     } catch (e) {
       console.error(e);
@@ -374,9 +593,41 @@ const QuizView = ({ module }: { module: any }) => {
   const handleAnswer = (index: number) => {
     if (showResult) return;
     setSelectedOption(index);
-    setShowResult(true);
-    if (index === questions[currentIndex].correctIndex) {
+    
+    const isCorrect = index === questions[currentIndex].correctIndex;
+    
+    // Save to answer history
+    setAnswerHistory(prev => [...prev, {
+      questionIndex: currentIndex,
+      selectedIndex: index,
+      correct: isCorrect
+    }]);
+    
+    // Save result to localStorage
+    const result: QuestionResult = {
+      questionId: questions[currentIndex].id || `${module.id}_${currentIndex}`,
+      question: questions[currentIndex].question,
+      moduleId: module.id,
+      correct: isCorrect,
+      timestamp: Date.now(),
+      selectedIndex: index,
+      correctIndex: questions[currentIndex].correctIndex
+    };
+    saveQuestionResult(result);
+    
+    if (!examMode) {
+      setShowResult(true);
+    }
+    
+    if (isCorrect) {
       setScore(s => s + 1);
+    }
+    
+    // In exam mode, auto-advance after short delay
+    if (examMode) {
+      setTimeout(() => {
+        nextQuestion();
+      }, 500);
     }
   };
 
@@ -387,12 +638,99 @@ const QuizView = ({ module }: { module: any }) => {
       setShowResult(false);
     } else {
       // End of quiz
-      alert(`Quiz beendet! Du hast ${score} von ${questions.length} richtig.`);
-      setQuestions([]); // Reset to allow restart
+      if (examMode) {
+        setShowExamResults(true);
+      } else {
+        const successRate = Math.round((score / questions.length) * 100);
+        alert(`Quiz beendet! Du hast ${score} von ${questions.length} richtig (${successRate}%).`);
+        setQuestions([]); // Reset to allow restart
+      }
     }
   };
 
+  const getElapsedTime = () => {
+    if (!examStartTime) return '0:00';
+    const elapsed = Math.floor((Date.now() - examStartTime) / 1000);
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
   if (loading) return <LoadingSpinner text="Generiere Prüfungsfragen..." />;
+
+  // Exam Results View
+  if (showExamResults) {
+    const successRate = Math.round((score / questions.length) * 100);
+    const passed = successRate >= 70;
+    const elapsedTime = getElapsedTime();
+    
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className={`text-center py-12 px-6 rounded-2xl mb-8 ${passed ? 'bg-green-50 border-2 border-green-200' : 'bg-red-50 border-2 border-red-200'}`}>
+          <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${passed ? 'bg-green-500' : 'bg-red-500'}`}>
+            {passed ? <Award className="w-10 h-10 text-white" /> : <XCircle className="w-10 h-10 text-white" />}
+          </div>
+          <h2 className={`text-3xl font-bold mb-2 ${passed ? 'text-green-900' : 'text-red-900'}`}>
+            {passed ? 'Prüfung bestanden!' : 'Nicht bestanden'}
+          </h2>
+          <p className={`text-lg mb-6 ${passed ? 'text-green-700' : 'text-red-700'}`}>
+            {score} von {questions.length} Fragen richtig ({successRate}%)
+          </p>
+          <div className="flex items-center justify-center gap-4 text-sm text-slate-600">
+            <div className="flex items-center gap-2">
+              <Clock size={16} />
+              <span>Zeit: {elapsedTime}</span>
+            </div>
+          </div>
+        </div>
+        
+        {/* Question Review */}
+        <div className="space-y-4">
+          <h3 className="text-xl font-bold text-slate-900 mb-4">Fragenübersicht</h3>
+          {questions.map((q, idx) => {
+            const answer = answerHistory[idx];
+            const isCorrect = answer?.correct;
+            
+            return (
+              <div key={idx} className={`p-4 rounded-xl border-2 ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                <div className="flex items-start gap-3">
+                  <div className={`mt-1 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isCorrect ? 'bg-green-500' : 'bg-red-500'}`}>
+                    {isCorrect ? <CheckCircle className="w-5 h-5 text-white" /> : <XCircle className="w-5 h-5 text-white" />}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-slate-900 mb-2">Frage {idx + 1}: {q.question}</p>
+                    <p className="text-sm text-slate-600 mb-1">
+                      <span className="font-medium">Deine Antwort:</span> {q.options[answer?.selectedIndex]}
+                    </p>
+                    {!isCorrect && (
+                      <p className="text-sm text-slate-600">
+                        <span className="font-medium">Richtige Antwort:</span> {q.options[q.correctIndex]}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        
+        <div className="mt-8 flex justify-center gap-4">
+          <button 
+            onClick={() => startQuiz(true)}
+            className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors"
+          >
+            Neue Prüfung starten
+          </button>
+          <button 
+            onClick={() => setQuestions([])}
+            className="bg-white border-2 border-slate-300 text-slate-700 px-8 py-3 rounded-xl font-bold hover:bg-slate-50 transition-colors"
+          >
+            Zurück
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (questions.length === 0) {
     return (
@@ -400,17 +738,59 @@ const QuizView = ({ module }: { module: any }) => {
         <div className="bg-blue-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
           <Target className="w-10 h-10 text-blue-600" />
         </div>
-        <h3 className="text-2xl font-bold text-slate-900 mb-2">Prüfungssimulation</h3>
+        <h3 className="text-2xl font-bold text-slate-900 mb-2">Prüfungstraining</h3>
         <p className="text-slate-500 mb-8 max-w-md mx-auto">
-          Starte einen zufälligen Fragenkatalog zu <strong>{module.title}</strong>. 
+          Wähle einen Modus für <strong>{module.title}</strong>. 
           Fragen basieren auf aktuellen IHK-Standards 2026.
         </p>
-        <button 
-          onClick={startQuiz}
-          className="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:bg-blue-700 hover:scale-105 transition-all"
-        >
-          Simulation starten
-        </button>
+        
+        {/* Mode Selection */}
+        <div className="max-w-2xl mx-auto space-y-4 mb-8">
+          <div 
+            onClick={() => startQuiz(false)}
+            className="bg-white p-6 rounded-xl border-2 border-slate-200 hover:border-blue-400 hover:shadow-lg transition-all cursor-pointer group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                <BookOpen className="w-6 h-6 text-blue-600 group-hover:text-white" />
+              </div>
+              <div className="text-left flex-1">
+                <h4 className="font-bold text-slate-900 mb-1">Übungsmodus</h4>
+                <p className="text-sm text-slate-600">5 Fragen mit sofortiger Erklärung nach jeder Antwort</p>
+              </div>
+              <ChevronRight className="w-6 h-6 text-slate-400 group-hover:text-blue-600" />
+            </div>
+          </div>
+          
+          <div 
+            onClick={() => startQuiz(true)}
+            className="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg hover:shadow-xl transition-all cursor-pointer group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <Award className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-left flex-1 text-white">
+                <h4 className="font-bold mb-1">Prüfungssimulation</h4>
+                <p className="text-sm text-purple-100">10 Fragen im echten Prüfungsformat mit Zeiterfassung</p>
+              </div>
+              <ChevronRight className="w-6 h-6 text-white/60 group-hover:text-white" />
+            </div>
+          </div>
+        </div>
+        
+        {/* Question Order Setting */}
+        <div className="max-w-md mx-auto mb-6">
+          <label className="text-sm font-medium text-slate-700 mb-2 block">Fragenreihenfolge:</label>
+          <select 
+            value={questionOrder}
+            onChange={(e) => setQuestionOrder(e.target.value as 'sequential' | 'random')}
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="random">Zufällig</option>
+            <option value="sequential">Fortlaufend</option>
+          </select>
+        </div>
       </div>
     );
   }
@@ -421,7 +801,10 @@ const QuizView = ({ module }: { module: any }) => {
     <div className="max-w-3xl mx-auto">
       <div className="flex justify-between items-center mb-6 text-sm text-slate-500 font-medium">
         <span>Frage {currentIndex + 1} von {questions.length}</span>
-        <span>Score: {score}</span>
+        <div className="flex items-center gap-4">
+          <span>Score: {score}</span>
+          {examMode && <span className="flex items-center gap-1"><Clock size={14} /> {getElapsedTime()}</span>}
+        </div>
       </div>
 
       <div className="mb-8">
@@ -431,7 +814,7 @@ const QuizView = ({ module }: { module: any }) => {
       <div className="space-y-3 mb-8">
         {q.options.map((opt, idx) => {
           let stateClass = "border-slate-200 hover:bg-slate-50 hover:border-blue-300";
-          if (showResult) {
+          if (showResult || (examMode && selectedOption !== null)) {
             if (idx === q.correctIndex) stateClass = "bg-green-50 border-green-500 text-green-900";
             else if (idx === selectedOption) stateClass = "bg-red-50 border-red-500 text-red-900";
             else stateClass = "border-slate-100 opacity-50";
@@ -441,11 +824,11 @@ const QuizView = ({ module }: { module: any }) => {
             <button
               key={idx}
               onClick={() => handleAnswer(idx)}
-              disabled={showResult}
+              disabled={showResult || (examMode && selectedOption !== null)}
               className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-start gap-3 ${stateClass}`}
             >
               <div className={`mt-0.5 w-6 h-6 rounded-full border flex items-center justify-center flex-shrink-0 text-xs font-bold
-                ${showResult && idx === q.correctIndex ? 'bg-green-500 border-green-500 text-white' : 'border-slate-300'}
+                ${(showResult || (examMode && selectedOption !== null)) && idx === q.correctIndex ? 'bg-green-500 border-green-500 text-white' : 'border-slate-300'}
               `}>
                 {String.fromCharCode(65 + idx)}
               </div>
@@ -455,7 +838,7 @@ const QuizView = ({ module }: { module: any }) => {
         })}
       </div>
 
-      {showResult && (
+      {showResult && !examMode && (
         <div className="animate-fade-in bg-slate-50 p-6 rounded-xl border border-slate-200 mb-8">
           <div className="flex items-center gap-2 mb-2 font-bold text-slate-900">
             {selectedOption === q.correctIndex ? (
@@ -469,7 +852,7 @@ const QuizView = ({ module }: { module: any }) => {
         </div>
       )}
 
-      {showResult && (
+      {showResult && !examMode && (
         <div className="flex justify-end">
           <button 
             onClick={nextQuestion}
