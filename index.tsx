@@ -15,8 +15,19 @@ import {
   Target, 
   XCircle,
   Menu,
-  X
+  X,
+  FileText,
+  Library,
+  Upload,
+  Trash2,
+  Eye,
+  Download
 } from "lucide-react";
+import { PDFUpload } from "./components/PDFUpload";
+import { PDFViewer } from "./components/PDFViewer";
+import { SearchBar } from "./components/SearchBar";
+import { usePDFContent } from "./hooks/usePDFContent";
+import { PDFContent, Chapter } from "./types/pdf";
 
 // --- Types & Constants ---
 
@@ -38,7 +49,7 @@ const MODULES = [
   { id: "auto", title: "Kraftfahrtversicherung", icon: Calculator, desc: "KH, Kasko, Typklassen, SF-Klassen" }
 ];
 
-type ViewState = "dashboard" | "module";
+type ViewState = "dashboard" | "module" | "pdf-library" | "pdf-viewer";
 type Mode = "theory" | "quiz" | "calc" | "chat";
 
 interface Question {
@@ -76,6 +87,9 @@ const App = () => {
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [activeMode, setActiveMode] = useState<Mode>("theory");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activePDF, setActivePDF] = useState<PDFContent | null>(null);
+  
+  const { pdfs, addPDF, removePDF, exportData, importData } = usePDFContent();
 
   const activeModule = MODULES.find(m => m.id === activeModuleId);
 
@@ -89,7 +103,32 @@ const App = () => {
   const goHome = () => {
     setView("dashboard");
     setActiveModuleId(null);
+    setActivePDF(null);
     setSidebarOpen(false);
+  };
+  
+  const openPDFLibrary = () => {
+    setView("pdf-library");
+    setActivePDF(null);
+    setSidebarOpen(false);
+  };
+  
+  const openPDFViewer = (pdf: PDFContent) => {
+    setActivePDF(pdf);
+    setView("pdf-viewer");
+    setSidebarOpen(false);
+  };
+  
+  const handlePDFUpload = async (pdf: PDFContent) => {
+    await addPDF(pdf);
+    alert(`PDF "${pdf.fileName}" erfolgreich hochgeladen und verarbeitet!`);
+  };
+  
+  const handleSearchSelect = (pdfId: string, chapter: Chapter) => {
+    const pdf = pdfs.find(p => p.id === pdfId);
+    if (pdf) {
+      openPDFViewer(pdf);
+    }
   };
 
   return (
@@ -127,6 +166,14 @@ const App = () => {
             <LayoutDashboard size={18} />
             Dashboard
           </button>
+          
+          <button 
+            onClick={openPDFLibrary}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${view === 'pdf-library' || view === 'pdf-viewer' ? 'bg-blue-600 text-white' : 'hover:bg-slate-800'}`}
+          >
+            <Library size={18} />
+            PDF Bibliothek
+          </button>
 
           <div className="pt-4 pb-2 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
             Lernfelder
@@ -148,7 +195,11 @@ const App = () => {
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto h-[calc(100vh-60px)] md:h-screen p-4 md:p-8">
         {view === "dashboard" ? (
-          <Dashboard onSelect={handleModuleSelect} />
+          <Dashboard onSelect={handleModuleSelect} onOpenPDFLibrary={openPDFLibrary} pdfsCount={pdfs.length} />
+        ) : view === "pdf-library" ? (
+          <PDFLibrary pdfs={pdfs} onPDFSelect={openPDFViewer} onPDFUpload={handlePDFUpload} onPDFDelete={removePDF} onExport={exportData} onImport={importData} onSearch={handleSearchSelect} />
+        ) : view === "pdf-viewer" && activePDF ? (
+          <PDFViewer pdf={activePDF} onClose={openPDFLibrary} />
         ) : (
           <div className="max-w-5xl mx-auto">
             {/* Module Header */}
@@ -198,13 +249,47 @@ const ModeButton = ({ active, onClick, icon: Icon, label }: any) => (
   </button>
 );
 
-const Dashboard = ({ onSelect }: { onSelect: (id: string) => void }) => (
+const Dashboard = ({ onSelect, onOpenPDFLibrary, pdfsCount }: { onSelect: (id: string) => void, onOpenPDFLibrary: () => void, pdfsCount: number }) => (
   <div className="max-w-6xl mx-auto">
     <div className="mb-10">
       <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Willkommen zurück, Experte.</h1>
       <p className="text-lg text-slate-600 max-w-2xl">
         Dein Lernfortschritt für die Prüfung 2026. Bereit für die nächste Einheit im Stil von Proximus?
       </p>
+    </div>
+    
+    {/* PDF Library Banner */}
+    <div 
+      onClick={onOpenPDFLibrary}
+      className="mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-8 rounded-2xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow relative overflow-hidden group"
+    >
+      <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-8 -mt-8 group-hover:scale-110 transition-transform"></div>
+      <div className="relative z-10 flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <Library className="w-8 h-8" />
+            <h2 className="text-2xl font-bold">PDF Bibliothek</h2>
+          </div>
+          <p className="text-blue-100 mb-4">
+            Lade dein Proximus 5 Buch hoch und lerne offline mit KI-gestützten Funktionen
+          </p>
+          <div className="flex items-center gap-6 text-sm">
+            <div className="flex items-center gap-2">
+              <FileText size={16} />
+              <span>{pdfsCount} {pdfsCount === 1 ? 'Dokument' : 'Dokumente'}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle size={16} />
+              <span>Offline verfügbar</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <BrainCircuit size={16} />
+              <span>KI-Analyse</span>
+            </div>
+          </div>
+        </div>
+        <ChevronRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
+      </div>
     </div>
 
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -706,6 +791,241 @@ const ChatView = ({ module }: { module: any }) => {
           <MessageSquare size={20} />
         </button>
       </div>
+    </div>
+  );
+};
+
+// --- PDF Library Component ---
+
+const PDFLibrary = ({ 
+  pdfs, 
+  onPDFSelect, 
+  onPDFUpload, 
+  onPDFDelete, 
+  onExport, 
+  onImport,
+  onSearch 
+}: { 
+  pdfs: PDFContent[], 
+  onPDFSelect: (pdf: PDFContent) => void,
+  onPDFUpload: (pdf: PDFContent) => void,
+  onPDFDelete: (id: string) => void,
+  onExport: () => Promise<string>,
+  onImport: (data: string) => Promise<void>,
+  onSearch: (pdfId: string, chapter: Chapter) => void
+}) => {
+  const [showUpload, setShowUpload] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  
+  const handleExport = async () => {
+    try {
+      const data = await onExport();
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `versicherung-pdfs-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('Fehler beim Exportieren der Daten');
+    }
+  };
+  
+  const handleImport = async () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.onchange = async (e: any) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      try {
+        const text = await file.text();
+        await onImport(text);
+        alert('Daten erfolgreich importiert!');
+      } catch (err) {
+        alert('Fehler beim Importieren der Daten');
+      }
+    };
+    input.click();
+  };
+  
+  const filteredPDFs = selectedCategory === 'all' 
+    ? pdfs 
+    : pdfs.filter(pdf => pdf.category === selectedCategory);
+  
+  return (
+    <div className="max-w-6xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">PDF Bibliothek</h1>
+        <p className="text-lg text-slate-600">
+          Verwalte deine Lernmaterialien, Rechnungen und Zertifikate an einem Ort.
+        </p>
+      </div>
+      
+      {/* Search Bar */}
+      {pdfs.length > 0 && (
+        <div className="mb-6">
+          <SearchBar pdfs={pdfs} onResultSelect={onSearch} />
+        </div>
+      )}
+      
+      {/* Actions */}
+      <div className="flex flex-wrap gap-3 mb-6">
+        <button
+          onClick={() => setShowUpload(!showUpload)}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <Upload size={18} />
+          PDF hochladen
+        </button>
+        <button
+          onClick={handleExport}
+          disabled={pdfs.length === 0}
+          className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-50"
+        >
+          <Download size={18} />
+          Exportieren
+        </button>
+        <button
+          onClick={handleImport}
+          className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+        >
+          <Upload size={18} />
+          Importieren
+        </button>
+      </div>
+      
+      {/* Upload Section */}
+      {showUpload && (
+        <div className="mb-8 animate-fade-in">
+          <PDFUpload 
+            onUploadComplete={(pdf) => {
+              onPDFUpload(pdf);
+              setShowUpload(false);
+            }}
+            onError={(error) => alert(error)}
+          />
+        </div>
+      )}
+      
+      {/* Category Filter */}
+      {pdfs.length > 0 && (
+        <div className="mb-6 flex flex-wrap gap-2">
+          <button
+            onClick={() => setSelectedCategory('all')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              selectedCategory === 'all'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300'
+            }`}
+          >
+            Alle ({pdfs.length})
+          </button>
+          {['lehrmaterial', 'rechnung', 'zertifikat', 'sonstiges'].map((cat) => {
+            const count = pdfs.filter(p => p.category === cat).length;
+            return (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  selectedCategory === cat
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300'
+                }`}
+              >
+                {cat.charAt(0).toUpperCase() + cat.slice(1)} ({count})
+              </button>
+            );
+          })}
+        </div>
+      )}
+      
+      {/* PDF Grid */}
+      {filteredPDFs.length === 0 ? (
+        <div className="text-center py-20 bg-white rounded-2xl border border-slate-200">
+          <Library className="w-20 h-20 mx-auto mb-4 text-slate-300" />
+          <h3 className="text-xl font-bold text-slate-900 mb-2">Noch keine PDFs vorhanden</h3>
+          <p className="text-slate-500 mb-6">
+            Lade dein erstes PDF hoch, um mit dem Lernen zu beginnen.
+          </p>
+          {!showUpload && (
+            <button
+              onClick={() => setShowUpload(true)}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Upload size={20} />
+              PDF hochladen
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredPDFs.map((pdf) => (
+            <div
+              key={pdf.id}
+              className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-lg transition-shadow group"
+            >
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center text-red-600 flex-shrink-0">
+                    <FileText size={24} />
+                  </div>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => onPDFSelect(pdf)}
+                      className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="Öffnen"
+                    >
+                      <Eye size={18} />
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (confirm(`PDF "${pdf.fileName}" wirklich löschen?`)) {
+                          await onPDFDelete(pdf.id);
+                        }
+                      }}
+                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Löschen"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+                
+                <h3 className="font-bold text-slate-900 mb-2 line-clamp-2">{pdf.fileName}</h3>
+                
+                <div className="space-y-2 text-sm text-slate-600">
+                  <div className="flex items-center gap-2">
+                    <BookOpen size={14} />
+                    <span>{pdf.totalPages} Seiten</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Target size={14} />
+                    <span>{pdf.chapters.length} Kapitel</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle size={14} />
+                    <span className="text-xs bg-slate-100 px-2 py-1 rounded">
+                      {pdf.category || 'sonstiges'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="border-t border-slate-100 px-6 py-3 bg-slate-50">
+                <button
+                  onClick={() => onPDFSelect(pdf)}
+                  className="w-full text-center text-sm font-medium text-blue-600 hover:text-blue-700"
+                >
+                  Öffnen und Lesen →
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
