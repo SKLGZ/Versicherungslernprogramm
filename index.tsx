@@ -87,9 +87,18 @@ const STORAGE_KEYS = {
   PROGRESS: 'versicherung_module_progress'
 };
 
+const safeJSONParse = <T,>(data: string | null, fallback: T): T => {
+  try {
+    return data ? JSON.parse(data) : fallback;
+  } catch (e) {
+    console.error('Failed to parse JSON:', e);
+    return fallback;
+  }
+};
+
 const saveQuestionResult = (result: QuestionResult) => {
   try {
-    const results = JSON.parse(localStorage.getItem(STORAGE_KEYS.RESULTS) || '[]');
+    const results = safeJSONParse<QuestionResult[]>(localStorage.getItem(STORAGE_KEYS.RESULTS), []);
     results.push(result);
     localStorage.setItem(STORAGE_KEYS.RESULTS, JSON.stringify(results));
     
@@ -101,16 +110,12 @@ const saveQuestionResult = (result: QuestionResult) => {
 };
 
 const getQuestionResults = (): QuestionResult[] => {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.RESULTS) || '[]');
-  } catch {
-    return [];
-  }
+  return safeJSONParse<QuestionResult[]>(localStorage.getItem(STORAGE_KEYS.RESULTS), []);
 };
 
 const updateModuleProgress = (moduleId: string, correct: boolean) => {
   try {
-    const progress = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROGRESS) || '{}');
+    const progress = safeJSONParse<{[key: string]: ModuleProgress}>(localStorage.getItem(STORAGE_KEYS.PROGRESS), {});
     
     if (!progress[moduleId]) {
       progress[moduleId] = {
@@ -137,20 +142,12 @@ const updateModuleProgress = (moduleId: string, correct: boolean) => {
 };
 
 const getModuleProgress = (moduleId: string): ModuleProgress | null => {
-  try {
-    const progress = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROGRESS) || '{}');
-    return progress[moduleId] || null;
-  } catch {
-    return null;
-  }
+  const progress = safeJSONParse<{[key: string]: ModuleProgress}>(localStorage.getItem(STORAGE_KEYS.PROGRESS), {});
+  return progress[moduleId] || null;
 };
 
 const getAllProgress = (): { [key: string]: ModuleProgress } => {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.PROGRESS) || '{}');
-  } catch {
-    return {};
-  }
+  return safeJSONParse<{[key: string]: ModuleProgress}>(localStorage.getItem(STORAGE_KEYS.PROGRESS), {});
 };
 
 const clearAllProgress = () => {
@@ -570,10 +567,12 @@ const QuizView = ({ module }: { module: any }) => {
       
       let data = JSON.parse(result.text || "[]");
       
-      // Add IDs to questions
+      // Add IDs to questions using crypto.randomUUID if available
       data = data.map((q: Question, idx: number) => ({
         ...q,
-        id: `${module.id}_${Date.now()}_${idx}`
+        id: typeof crypto !== 'undefined' && crypto.randomUUID 
+          ? crypto.randomUUID() 
+          : `${module.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${idx}`
       }));
       
       // Shuffle questions if random order
@@ -651,8 +650,13 @@ const QuizView = ({ module }: { module: any }) => {
   const getElapsedTime = () => {
     if (!examStartTime) return '0:00';
     const elapsed = Math.floor((Date.now() - examStartTime) / 1000);
-    const minutes = Math.floor(elapsed / 60);
+    const hours = Math.floor(elapsed / 3600);
+    const minutes = Math.floor((elapsed % 3600) / 60);
     const seconds = elapsed % 60;
+    
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
