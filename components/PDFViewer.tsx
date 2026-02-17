@@ -27,7 +27,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ pdf, onClose }) => {
     if (!newNote.trim()) return;
 
     const note: NoteEntry = {
-      id: `note-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `note-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       pdfId: pdf.id,
       chapterTitle: activeChapter.title,
       content: newNote,

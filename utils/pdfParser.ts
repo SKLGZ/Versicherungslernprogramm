@@ -114,7 +114,7 @@ export const parsePDF = async (file: File, category?: string): Promise<PDFConten
   const fullText = pages.map(p => p.text).join('\n');
   
   const pdfContent: PDFContent = {
-    id: `pdf-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    id: `pdf-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
     fileName: file.name,
     uploadDate: new Date(),
     totalPages: pages.length,
